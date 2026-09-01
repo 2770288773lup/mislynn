@@ -377,17 +377,19 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 700px) and (min-aspect-ratio: 0) {
   .overlay-page { padding: 10px; gap: 10px; }
   .overlay-now, .overlay-next { width: 100%; box-sizing: border-box; }
-  .overlay-now { min-height: 0; padding: 20px 20px; }
+  .overlay-page { min-height: 100vh; justify-content: flex-start; }
+  .overlay-now { flex: 0 0 auto; min-height: 0; padding: 20px 20px; }
   .overlay-now__label { font-size: 11px; letter-spacing: 1.8px; }
   .overlay-now__main { margin-top: 15px; gap: 14px; }
   .overlay-disc { width: 60px; height: 60px; border-width: 6px; }
   .overlay-now h1 { max-width: calc(100vw - 130px); font-size: 28px; line-height: 1.25; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
   .overlay-now p { margin-top: 6px; font-size: 14px; }
   .overlay-requester { margin: 13px 0 0 74px; font-size: 12px; }
-  .overlay-next { padding: 16px 18px; }
+  .overlay-next { min-height: 0; flex: 1 1 auto; display: flex; flex-direction: column; padding: 16px 18px; }
   .overlay-next header { padding-bottom: 12px; font-size: 14px; }
   .overlay-next header small { font-size: 10px; }
-  .overlay-next article { min-height: 80px; grid-template-columns: 34px minmax(0, 1fr); align-items: start; gap: 8px; padding: 11px 0; }
+  .overlay-next > div { flex: 1 1 auto; display: flex; flex-direction: column; }
+  .overlay-next article { flex: 1 1 0; min-height: 80px; grid-template-columns: 34px minmax(0, 1fr); align-items: center; gap: 8px; padding: 11px 0; }
   .overlay-next article > span { padding-top: 3px; font-size: 14px; }
   .overlay-next article strong { font-size: 18px; line-height: 1.25; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
   .overlay-next article small { margin-top: 5px; font-size: 13px; }
