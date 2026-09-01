@@ -9,9 +9,11 @@ export function OverlayPage() {
 
   useEffect(() => {
     document.body.classList.add('overlay-body');
+    document.documentElement.classList.add('overlay-html');
     if (fullMode) document.body.classList.add('overlay-body--full');
     return () => {
       document.body.classList.remove('overlay-body', 'overlay-body--full');
+      document.documentElement.classList.remove('overlay-html');
     };
   }, [fullMode]);
 
