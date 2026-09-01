@@ -6,6 +6,7 @@ import { parseSongList } from './song-parser.js';
 const DEFAULT_SETTINGS = {
   requestsOpen: true,
   maxPerViewer: 2,
+  vipNicknames: ['lclol', 'lol'],
   notice: '欢迎小鸟们来点歌',
 };
 
@@ -25,8 +26,16 @@ export function normalizeNickname(nickname) {
   return nickname.trim().toLowerCase().replace(/\s+/g, '');
 }
 
-export function isVipNickname(nickname) {
-  return ['lclol', 'lol'].includes(normalizeNickname(nickname));
+export function normalizeVipNicknames(value) {
+  const values = Array.isArray(value) ? value : [];
+  return [...new Set(values
+    .filter((item) => typeof item === 'string')
+    .map((item) => normalizeNickname(item))
+    .filter(Boolean))].slice(0, 100);
+}
+
+export function isVipNickname(nickname, vipNicknames = DEFAULT_SETTINGS.vipNicknames) {
+  return normalizeVipNicknames(vipNicknames).includes(normalizeNickname(nickname));
 }
 
 export function createDatabase({ dataDir, songFile }) {
@@ -125,6 +134,7 @@ export function readSettings(database) {
       settings[row.key] = row.value;
     }
   }
+  settings.vipNicknames = normalizeVipNicknames(settings.vipNicknames);
   return settings;
 }
 

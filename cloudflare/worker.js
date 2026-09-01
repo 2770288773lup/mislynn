@@ -4,8 +4,8 @@ const DEFAULT_SETTINGS = {
   requestsOpen: true,
   maxPerViewer: 2,
   notice: '欢迎小鸟们来点歌',
+  vipNicknames: ['lclol', 'lol'],
 };
-const VIP_NAMES = new Set(['lclol', 'lol']);
 const TOKEN_TTL_SECONDS = 12 * 60 * 60;
 
 function json(data, status = 200) {
@@ -19,8 +19,13 @@ function normalizeNickname(value) {
   return String(value || '').trim().toLowerCase().replace(/\s+/g, '');
 }
 
-function isVipNickname(value) {
-  return VIP_NAMES.has(normalizeNickname(value));
+function normalizeVipNicknames(value) {
+  const values = Array.isArray(value) ? value : [];
+  return [...new Set(values.filter((item) => typeof item === 'string').map(normalizeNickname).filter(Boolean))].slice(0, 100);
+}
+
+function isVipNickname(value, vipNicknames = DEFAULT_SETTINGS.vipNicknames) {
+  return normalizeVipNicknames(vipNicknames).includes(normalizeNickname(value));
 }
 
 function cleanText(value, maxLength) {
@@ -92,6 +97,8 @@ export class StageRoom {
       value = initialState();
       await this.state.storage.put('stage', value);
     }
+    value.settings = { ...DEFAULT_SETTINGS, ...(value.settings || {}) };
+    value.settings.vipNicknames = normalizeVipNicknames(value.settings.vipNicknames);
     return value;
   }
 
@@ -171,7 +178,7 @@ export class StageRoom {
     if (state.queue.some((item) => item.songId === songId && (item.status === 'queued' || item.status === 'singing'))) {
       return json({ message: '这首歌已经在队列里啦' }, 409);
     }
-    const vip = isVipNickname(nickname);
+    const vip = isVipNickname(nickname, state.settings.vipNicknames);
     const normalized = normalizeNickname(nickname);
     if (!vip && state.queue.filter((item) => item.normalizedNickname === normalized && (item.status === 'queued' || item.status === 'singing')).length >= state.settings.maxPerViewer) {
       return json({ message: `每位小鸟最多同时点 ${state.settings.maxPerViewer} 首歌` }, 409);
@@ -196,6 +203,7 @@ export class StageRoom {
     if ('requestsOpen' in data) state.settings.requestsOpen = Boolean(data.requestsOpen);
     if ('maxPerViewer' in data) state.settings.maxPerViewer = Math.max(1, Math.min(20, Number(data.maxPerViewer) || 2));
     if ('notice' in data) state.settings.notice = cleanText(data.notice, 80);
+    if ('vipNicknames' in data) state.settings.vipNicknames = normalizeVipNicknames(data.vipNicknames);
     await this.save(state);
     return json(state.settings);
   }
@@ -206,7 +214,8 @@ export class StageRoom {
     const song = state.songs.find((item) => item.id === Number(data.songId));
     if (!song) return json({ message: '歌曲不存在' }, 404);
     const sortOrder = Math.max(0, ...state.queue.filter((item) => item.status === 'queued').map((item) => item.sortOrder)) + 1;
-    state.queue.push({ id: state.nextQueueId++, songId: song.id, songTitle: song.title, artist: song.artist, nickname: cleanText(data.nickname, 24) || '林子', normalizedNickname: normalizeNickname(data.nickname || '林子'), isVip: isVipNickname(data.nickname || '林子'), status: 'queued', sortOrder, requestedAt: new Date().toISOString(), startedAt: null });
+    const nickname = cleanText(data.nickname, 24) || '林子';
+    state.queue.push({ id: state.nextQueueId++, songId: song.id, songTitle: song.title, artist: song.artist, nickname, normalizedNickname: normalizeNickname(nickname), isVip: isVipNickname(nickname, state.settings.vipNicknames), status: 'queued', sortOrder, requestedAt: new Date().toISOString(), startedAt: null });
     await this.save(state);
     return json({ ok: true }, 201);
   }

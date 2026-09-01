@@ -23,8 +23,9 @@ function normalized(value) {
   return value.toLocaleLowerCase('zh-CN').replace(/\s+/g, '');
 }
 
-function isVip(nickname) {
-  return ['lclol', 'lol'].includes(normalized(nickname));
+function isVip(nickname, vipNicknames = ['lclol', 'lol']) {
+  const names = Array.isArray(vipNicknames) ? vipNicknames : [];
+  return names.map(normalized).includes(normalized(nickname));
 }
 
 function NicknameDialog({ initialValue, onSave, onClose }) {
@@ -191,7 +192,7 @@ export function ViewerPage() {
   if (loading) return <LoadingScreen />;
   if (!state) return <main className="fatal-state"><h1>暂时无法打开歌单</h1><p>{error}</p></main>;
 
-  const vip = isVip(nickname);
+  const vip = isVip(nickname, state.settings.vipNicknames);
 
   return (
     <div className="viewer-page">

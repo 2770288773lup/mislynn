@@ -13,6 +13,7 @@ import {
   createDatabase,
   isVipNickname,
   normalizeNickname,
+  normalizeVipNicknames,
   publicState,
   readSettings,
   writeSetting,
@@ -83,7 +84,7 @@ app.post('/api/queue', requestLimiter, (request, response) => {
   if (duplicate) return response.status(409).json({ message: '这首歌已经在队列里啦' });
 
   const normalizedNickname = normalizeNickname(nickname);
-  const vip = isVipNickname(nickname);
+  const vip = isVipNickname(nickname, settings.vipNicknames);
   if (!vip) {
     const activeCount = database.prepare(`
       SELECT COUNT(*) AS count FROM queue
@@ -135,13 +136,14 @@ app.get('/api/admin/state', requireAdmin, (_request, response) => {
 });
 
 app.patch('/api/admin/settings', requireAdmin, (request, response) => {
-  const allowed = ['requestsOpen', 'maxPerViewer', 'notice'];
+  const allowed = ['requestsOpen', 'maxPerViewer', 'notice', 'vipNicknames'];
   for (const key of allowed) {
     if (!(key in request.body)) continue;
     let value = request.body[key];
     if (key === 'requestsOpen') value = Boolean(value);
     if (key === 'maxPerViewer') value = Math.max(1, Math.min(20, Number(value) || 2));
     if (key === 'notice') value = cleanText(value, 80);
+    if (key === 'vipNicknames') value = normalizeVipNicknames(value);
     writeSetting(database, key, value);
   }
   emitUpdate();
@@ -164,7 +166,7 @@ app.post('/api/admin/queue/manual', requireAdmin, (request, response) => {
     ) VALUES (?, ?, ?, ?, ?, ?, 'queued', ?, ?)
   `).run(
     song.id, song.title, song.artist, nickname, normalizeNickname(nickname),
-    isVipNickname(nickname) ? 1 : 0, maxOrder + 1, new Date().toISOString(),
+    isVipNickname(nickname, readSettings(database).vipNicknames) ? 1 : 0, maxOrder + 1, new Date().toISOString(),
   );
   emitUpdate();
   response.status(201).json({ ok: true });

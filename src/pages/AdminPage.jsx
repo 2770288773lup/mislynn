@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowDown,
   ArrowUp,
@@ -299,6 +299,12 @@ function LibraryView({ state, token, refresh, showToast }) {
 function SettingsView({ state, token, refresh, showToast }) {
   const [notice, setNotice] = useState(state.settings.notice);
   const [maxPerViewer, setMaxPerViewer] = useState(state.settings.maxPerViewer);
+  const [vipNicknames, setVipNicknames] = useState(state.settings.vipNicknames || []);
+  const [vipNickname, setVipNickname] = useState('');
+
+  useEffect(() => {
+    setVipNicknames(state.settings.vipNicknames || []);
+  }, [state.settings.vipNicknames]);
 
   async function save(values, successMessage) {
     try {
@@ -308,6 +314,23 @@ function SettingsView({ state, token, refresh, showToast }) {
     } catch (error) {
       showToast(error.message, 'error');
     }
+  }
+
+  async function addVipNickname(event) {
+    event.preventDefault();
+    const next = vipNickname.trim().replace(/\s+/g, '').slice(0, 24);
+    if (!next) return;
+    const normalized = next.toLowerCase();
+    if (vipNicknames.some((name) => name.toLowerCase() === normalized)) {
+      showToast('这个昵称已经在 VIP 名单中', 'error');
+      return;
+    }
+    await save({ vipNicknames: [...vipNicknames, next] }, 'VIP 小鸟已添加');
+    setVipNickname('');
+  }
+
+  async function removeVipNickname(name) {
+    await save({ vipNicknames: vipNicknames.filter((item) => item !== name) }, 'VIP 小鸟已移除');
   }
 
   return (
@@ -324,6 +347,20 @@ function SettingsView({ state, token, refresh, showToast }) {
       <div className="settings-row settings-row--notice">
         <div><strong>观众页公告</strong><span>显示在点歌台页首</span></div>
         <div className="notice-setting"><input maxLength="80" value={notice} onChange={(event) => setNotice(event.target.value)} /><button className="button button--secondary button--small" onClick={() => save({ notice }, '公告已更新')}>保存</button></div>
+      </div>
+      <div className="settings-row settings-row--vip">
+        <div><strong>VIP 小鸟管理</strong><span>VIP 不受每人点歌上限限制，但仍按提交顺序正常排队</span></div>
+        <div className="vip-manager">
+          <form className="vip-manager__form" onSubmit={addVipNickname}>
+            <input maxLength="24" value={vipNickname} onChange={(event) => setVipNickname(event.target.value)} placeholder="输入昵称后添加" />
+            <button className="button button--secondary button--small" disabled={!vipNickname.trim()}><Plus size={14} /> 添加</button>
+          </form>
+          <div className="vip-manager__list">
+            {vipNicknames.length ? vipNicknames.map((name) => (
+              <span className="vip-manager__item" key={name}><span>{name}</span><button type="button" className="icon-button" onClick={() => removeVipNickname(name)} title={`移除 ${name}`} aria-label={`移除 ${name}`}><Trash2 size={14} /></button></span>
+            )) : <span className="vip-manager__empty">暂未添加 VIP 小鸟</span>}
+          </div>
+        </div>
       </div>
       <div className="settings-note"><LockKeyhole size={18} /><div><strong>公网部署前更改管理密码</strong><span>通过服务器环境变量 ADMIN_PASSWORD 和 AUTH_SECRET 配置，不会暴露在网页中。</span></div></div>
     </section>
