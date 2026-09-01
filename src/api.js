@@ -23,6 +23,12 @@ let socket;
 
 export function liveSocket() {
   if (!socket) {
+    // The Node deployment exposes Socket.IO; the Cloudflare Worker exposes /ws.
+    const isWorkerRuntime = window.location.hostname.endsWith('.workers.dev') || window.location.hostname.endsWith('.pages.dev');
+    if (!isWorkerRuntime) {
+      socket = io({ autoConnect: true });
+      return socket;
+    }
     const listeners = new Set();
     let connection;
     let reconnectTimer;
@@ -39,3 +45,4 @@ export function liveSocket() {
   }
   return socket;
 }
+import { io } from 'socket.io-client';

@@ -373,6 +373,25 @@ a { color: inherit; text-decoration: none; }
   .overlay-now, .overlay-next { width: calc(100vw - 36px); }
 }
 
+/* Portrait browser sources (for vertical Bilibili scenes). */
+@media (max-width: 700px) and (min-aspect-ratio: 0) {
+  .overlay-page { padding: 14px; gap: 10px; }
+  .overlay-now, .overlay-next { width: 100%; box-sizing: border-box; }
+  .overlay-now { min-height: 0; padding: 14px 16px; }
+  .overlay-now__label { font-size: 9px; letter-spacing: 1.5px; }
+  .overlay-now__main { margin-top: 10px; gap: 10px; }
+  .overlay-disc { width: 42px; height: 42px; border-width: 4px; }
+  .overlay-now h1 { max-width: calc(100vw - 105px); font-size: 18px; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .overlay-now p { font-size: 10px; }
+  .overlay-requester { margin: 9px 0 0 52px; font-size: 9px; }
+  .overlay-next { padding: 12px 14px; }
+  .overlay-next header { padding-bottom: 8px; font-size: 10px; }
+  .overlay-next article { min-height: 42px; grid-template-columns: 24px minmax(0, 1fr); gap: 6px; }
+  .overlay-next article strong { font-size: 10px; }
+  .overlay-next article small { font-size: 8px; }
+  .overlay-next article em { grid-column: 2; grid-row: 2; margin-top: -12px; text-align: left; font-size: 8px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
 }
