@@ -375,21 +375,23 @@ a { color: inherit; text-decoration: none; }
 
 /* Portrait browser sources (for vertical Bilibili scenes). */
 @media (max-width: 700px) and (min-aspect-ratio: 0) {
-  .overlay-page { padding: 14px; gap: 10px; }
+  .overlay-page { padding: 12px; gap: 12px; }
   .overlay-now, .overlay-next { width: 100%; box-sizing: border-box; }
-  .overlay-now { min-height: 0; padding: 14px 16px; }
-  .overlay-now__label { font-size: 9px; letter-spacing: 1.5px; }
-  .overlay-now__main { margin-top: 10px; gap: 10px; }
-  .overlay-disc { width: 42px; height: 42px; border-width: 4px; }
-  .overlay-now h1 { max-width: calc(100vw - 105px); font-size: 18px; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-  .overlay-now p { font-size: 10px; }
-  .overlay-requester { margin: 9px 0 0 52px; font-size: 9px; }
-  .overlay-next { padding: 12px 14px; }
-  .overlay-next header { padding-bottom: 8px; font-size: 10px; }
-  .overlay-next article { min-height: 42px; grid-template-columns: 24px minmax(0, 1fr); gap: 6px; }
-  .overlay-next article strong { font-size: 10px; }
-  .overlay-next article small { font-size: 8px; }
-  .overlay-next article em { grid-column: 2; grid-row: 2; margin-top: -12px; text-align: left; font-size: 8px; }
+  .overlay-now { min-height: 0; padding: 16px 18px; }
+  .overlay-now__label { font-size: 10px; letter-spacing: 1.6px; }
+  .overlay-now__main { margin-top: 12px; gap: 12px; }
+  .overlay-disc { width: 48px; height: 48px; border-width: 5px; }
+  .overlay-now h1 { max-width: calc(100vw - 112px); font-size: 22px; line-height: 1.25; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .overlay-now p { margin-top: 5px; font-size: 12px; }
+  .overlay-requester { margin: 11px 0 0 60px; font-size: 11px; }
+  .overlay-next { padding: 14px 16px; }
+  .overlay-next header { padding-bottom: 10px; font-size: 13px; }
+  .overlay-next header small { font-size: 9px; }
+  .overlay-next article { min-height: 62px; grid-template-columns: 30px minmax(0, 1fr); align-items: start; gap: 7px; padding: 8px 0; }
+  .overlay-next article > span { padding-top: 2px; font-size: 12px; }
+  .overlay-next article strong { font-size: 14px; line-height: 1.25; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .overlay-next article small { margin-top: 4px; font-size: 11px; }
+  .overlay-next article em { grid-column: 2; grid-row: 3; margin-top: 4px; text-align: left; font-size: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
