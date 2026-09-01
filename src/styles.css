@@ -264,26 +264,26 @@ a { color: inherit; text-decoration: none; }
 /* OBS overlay */
 .overlay-body { background: transparent !important; overflow: hidden; }
 .overlay-body #root { min-height: 100vh; }
-.overlay-page { min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; gap: 14px; padding: 35px; color: #fff; }
+.overlay-page { min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; gap: 14px; padding: 35px; color: #69e7d0; }
 .overlay-now, .overlay-next { width: min(600px, calc(100vw - 70px)); border: 1px solid rgba(170,211,235,.34); background: rgba(16, 38, 66, .91); box-shadow: 0 15px 45px rgba(0,0,0,.25); backdrop-filter: blur(12px); }
 .overlay-now { min-height: 150px; padding: 20px 24px; border-left: 4px solid #6ccde0; }
 .overlay-now__label { display: flex; align-items: center; gap: 7px; color: #8fd8e4; font-size: 10px; font-weight: 700; letter-spacing: 2px; }
 .overlay-now__label svg { fill: #68d1dd; }
 .overlay-now__main { margin-top: 15px; display: flex; align-items: center; gap: 16px; }
 .overlay-disc { width: 57px; height: 57px; display: grid; place-items: center; background: #0a2039; border: 6px solid rgba(255,255,255,.14); border-radius: 50%; animation: spin 10s linear infinite; flex: 0 0 auto; }
-.overlay-now h1 { max-width: 450px; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 26px; }
-.overlay-now p { margin: 3px 0 0; color: #bbcfdf; font-size: 12px; }
-.overlay-requester { margin: 12px 0 0 73px; display: flex; align-items: center; gap: 7px; color: #9eb5c9; font-size: 10px; }
+.overlay-now h1 { max-width: 450px; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ffd166; text-shadow: 0 2px 4px rgba(4, 15, 29, .9); font-size: 26px; }
+.overlay-now p { margin: 3px 0 0; color: #73c8ff; text-shadow: 0 1px 3px rgba(4, 15, 29, .9); font-size: 12px; }
+.overlay-requester { margin: 12px 0 0 73px; display: flex; align-items: center; gap: 7px; color: #c38cff; text-shadow: 0 1px 3px rgba(4, 15, 29, .9); font-size: 10px; }
 .overlay-next { padding: 15px 20px; }
-.overlay-next header { display: flex; align-items: center; gap: 7px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,.12); font-size: 11px; font-weight: 600; }
-.overlay-next header small { margin-left: auto; color: #7495af; font-size: 8px; letter-spacing: 1.4px; }
-.overlay-next article { min-height: 44px; display: grid; grid-template-columns: 29px minmax(0, 1fr) 110px; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,.08); }
-.overlay-next article > span { color: #728ca3; font-family: Georgia, serif; font-size: 11px; }
+.overlay-next header { display: flex; align-items: center; gap: 7px; padding-bottom: 10px; border-bottom: 1px solid rgba(105,231,208,.32); color: #69e7d0; text-shadow: 0 1px 3px rgba(4, 15, 29, .9); font-size: 11px; font-weight: 600; }
+.overlay-next header small { margin-left: auto; color: #73c8ff; font-size: 8px; letter-spacing: 1.4px; }
+.overlay-next article { min-height: 44px; display: grid; grid-template-columns: 29px minmax(0, 1fr) 110px; align-items: center; gap: 8px; border-bottom: 1px solid rgba(105,231,208,.2); }
+.overlay-next article > span { color: #69e7d0; font-family: Georgia, serif; font-size: 11px; }
 .overlay-next article strong, .overlay-next article small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.overlay-next article strong { font-size: 11px; }
-.overlay-next article small { margin-top: 2px; color: #91a8ba; font-size: 8px; }
-.overlay-next article em { color: #96aabd; font-size: 9px; font-style: normal; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.overlay-empty { margin: 15px 0 2px; color: #89a0b4; font-size: 10px; }
+.overlay-next article strong { color: #ffd166; text-shadow: 0 2px 4px rgba(4, 15, 29, .9); font-size: 11px; }
+.overlay-next article small { margin-top: 2px; color: #73c8ff; font-size: 8px; }
+.overlay-next article em { color: #c38cff; font-size: 9px; font-style: normal; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.overlay-empty { margin: 15px 0 2px; color: #73c8ff; font-size: 10px; }
 .overlay-page--full { align-items: flex-start; justify-content: flex-end; background: linear-gradient(90deg, rgba(5,20,40,.3), transparent 55%), url('/assets/character/190ec5b7b1de6c81a011e81831945821.jpg') center / cover; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
