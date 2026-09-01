@@ -52,6 +52,19 @@ GitHub 私人仓库可以直接作为部署源。平台需要能运行 Docker �
 
 使用仓库中的 `Dockerfile` 构建镜像，运行时设置上述环境变量，并把持久化卷挂载到 `/app/data`。反向代理到容器 `3000` 端口并启用 HTTPS；Socket.IO 需要允许 WebSocket 升级。
 
+### Cloudflare Workers + Durable Objects
+
+仓库已经包含 `wrangler.jsonc` 和 Worker 后端。完成 `wrangler login` 后，在项目根目录执行：
+
+```bash
+npm run build:cf
+npx wrangler secret put ADMIN_PASSWORD
+npx wrangler secret put AUTH_SECRET
+npx wrangler deploy
+```
+
+首次部署会创建名为 `linzi-song-stage` 的 Worker 和一个名为 `global` 的 Durable Object 实例。Worker Assets 会同时托管前端页面，Durable Object 负责共享队列、设置和 WebSocket 广播，因此不需要 `DATA_DIR` 或 SQLite 文件卷。生产环境请把 `ADMIN_PASSWORD` 和 `AUTH_SECRET` 作为 Cloudflare Secret 保存，不要写入仓库。
+
 ## 管理台首次使用
 
 打开 `https://你的域名/admin`，输入 `ADMIN_PASSWORD`。主播常用操作在“当前队列”中完成；“复制”按钮可复制“歌名 - 歌手”，直接粘贴到全民 K 歌搜索。

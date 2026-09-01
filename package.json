@@ -10,6 +10,8 @@
   "scripts": {
     "dev": "concurrently -k -n server,web -c cyan,magenta \"node --watch server/index.js\" \"vite\"",
     "build": "vite build",
+    "build:cf": "node scripts/build-cloudflare-seed.mjs && vite build",
+    "deploy:cf": "npm run build:cf && npx wrangler deploy",
     "start": "node server/index.js",
     "test": "node --test"
   },

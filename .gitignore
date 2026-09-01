@@ -5,3 +5,4 @@ data/
 *.log
 .playwright-mcp/
 pi/
+public/assets/character/

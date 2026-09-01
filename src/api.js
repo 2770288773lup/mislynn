@@ -1,5 +1,3 @@
-import { io } from 'socket.io-client';
-
 export async function api(path, options = {}) {
   const { token, body, ...fetchOptions } = options;
   const response = await fetch(path, {
@@ -24,6 +22,20 @@ export async function api(path, options = {}) {
 let socket;
 
 export function liveSocket() {
-  if (!socket) socket = io({ autoConnect: true });
+  if (!socket) {
+    const listeners = new Set();
+    let connection;
+    let reconnectTimer;
+    const connect = () => {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      connection = new WebSocket(`${protocol}//${window.location.host}/ws`);
+      connection.addEventListener('message', (event) => {
+        try { if (JSON.parse(event.data).type === 'state:update') listeners.forEach((listener) => listener()); } catch { /* ignore malformed heartbeat */ }
+      });
+      connection.addEventListener('close', () => { clearTimeout(reconnectTimer); reconnectTimer = setTimeout(connect, 3000); });
+    };
+    connect();
+    socket = { on: (_event, listener) => listeners.add(listener), off: (_event, listener) => listeners.delete(listener) };
+  }
   return socket;
 }
