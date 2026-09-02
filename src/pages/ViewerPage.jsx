@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
+  AudioLines,
   ChevronDown,
   Clock3,
   Dices,
+  Languages,
   ListMusic,
   LogOut,
   Music2,
@@ -15,6 +17,7 @@ import {
 import { api } from '../api.js';
 import { Avatar, EmptyState, LoadingScreen, Logo, StatusBadge, Toast, VipBadge } from '../components.jsx';
 import { useLiveState, useToast } from '../hooks.js';
+import { classifySong, GENRE_FILTERS, LANGUAGE_FILTERS } from '../song-taxonomy.js';
 
 const NICKNAME_KEY = 'linzi-viewer-nickname';
 const PAGE_SIZE = 60;
@@ -129,25 +132,38 @@ export function ViewerPage() {
   const [query, setQuery] = useState('');
   const [section, setSection] = useState('全部');
   const [filter, setFilter] = useState('all');
+  const [genre, setGenre] = useState('all');
+  const [language, setLanguage] = useState('all');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [requesting, setRequesting] = useState(null);
+  const [randomSongId, setRandomSongId] = useState(null);
   const [mobileTab, setMobileTab] = useState('songs');
 
+  const catalogSongs = useMemo(
+    () => state?.songs.map(classifySong) || [],
+    [state],
+  );
+
   const sections = useMemo(() => {
-    if (!state) return [];
-    return [...new Set(state.songs.map((song) => song.section).filter(Boolean))];
-  }, [state]);
+    return [...new Set(catalogSongs.map((song) => song.section).filter(Boolean))];
+  }, [catalogSongs]);
 
   const filteredSongs = useMemo(() => {
-    if (!state) return [];
     const needle = normalized(query);
-    return state.songs.filter((song) => {
+    return catalogSongs.filter((song) => {
       if (section !== '全部' && song.section !== section) return false;
       if (filter === 'chorus' && !song.isChorus) return false;
-      if (needle && !normalized(`${song.title}${song.artist}${song.note}`).includes(needle)) return false;
+      if (genre !== 'all' && song.genre !== genre) return false;
+      if (language !== 'all' && !song.languages.includes(language)) return false;
+      if (needle && !normalized(`${song.title}${song.artist}${song.note}${song.genre}${song.languages.join('')}`).includes(needle)) return false;
       return true;
     });
-  }, [filter, query, section, state]);
+  }, [catalogSongs, filter, genre, language, query, section]);
+
+  const randomSong = useMemo(
+    () => catalogSongs.find((song) => song.id === randomSongId) || null,
+    [catalogSongs, randomSongId],
+  );
 
   const activeSongIds = useMemo(
     () => new Set(state?.queue.map((item) => item.songId) || []),
@@ -180,13 +196,24 @@ export function ViewerPage() {
     }
   }
 
-  function randomSong() {
+  function chooseRandomSong() {
     const available = filteredSongs.filter((song) => !activeSongIds.has(song.id));
     if (!available.length) return showToast('当前筛选下没有可点的歌曲', 'error');
-    const song = available[Math.floor(Math.random() * available.length)];
-    setQuery(song.title);
+    const newChoices = available.filter((song) => song.id !== randomSongId);
+    const pool = newChoices.length ? newChoices : available;
+    setRandomSongId(pool[Math.floor(Math.random() * pool.length)].id);
+  }
+
+  function updateSearch(nextQuery) {
+    setQuery(nextQuery);
+    setRandomSongId(null);
     setVisibleCount(PAGE_SIZE);
-    document.querySelector('.song-catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function updateCategory(setter, value) {
+    setter(value);
+    setRandomSongId(null);
+    setVisibleCount(PAGE_SIZE);
   }
 
   if (loading) return <LoadingScreen />;
@@ -239,34 +266,78 @@ export function ViewerPage() {
               <Search size={19} />
               <input
                 value={query}
-                onChange={(event) => { setQuery(event.target.value); setVisibleCount(PAGE_SIZE); }}
+                onChange={(event) => updateSearch(event.target.value)}
                 placeholder="搜索歌名、歌手"
                 aria-label="搜索歌名或歌手"
               />
               {query && (
-                <button className="icon-button" onClick={() => setQuery('')} title="清空搜索" aria-label="清空搜索">
+                <button className="icon-button" onClick={() => updateSearch('')} title="清空搜索" aria-label="清空搜索">
                   <X size={16} />
                 </button>
               )}
             </div>
-            <button className="button button--secondary" onClick={randomSong}>
-              <Dices size={17} /> 手气不错
+            <button className="button button--secondary random-trigger" onClick={chooseRandomSong}>
+              <Dices size={17} /> {randomSong ? '再摇一次' : '手气不错'}
             </button>
           </div>
 
-          <div className="filter-row">
-            <div className="segmented-control">
-              <button className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>全部歌曲</button>
-              <button className={filter === 'chorus' ? 'active' : ''} onClick={() => setFilter('chorus')}>合唱</button>
+          <div className="catalog-filters">
+            <div className="filter-row">
+              <div className="segmented-control">
+                <button className={filter === 'all' ? 'active' : ''} onClick={() => updateCategory(setFilter, 'all')}>全部歌曲</button>
+                <button className={filter === 'chorus' ? 'active' : ''} onClick={() => updateCategory(setFilter, 'chorus')}>合唱</button>
+              </div>
+              <div className="taxonomy-filters">
+                <label className="select-filter">
+                  <AudioLines size={15} />
+                  <span>曲风</span>
+                  <select value={genre} onChange={(event) => updateCategory(setGenre, event.target.value)} aria-label="按曲风筛选">
+                    {GENRE_FILTERS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                  </select>
+                </label>
+                <label className="select-filter">
+                  <Languages size={15} />
+                  <span>语言</span>
+                  <select value={language} onChange={(event) => updateCategory(setLanguage, event.target.value)} aria-label="按语言筛选">
+                    {LANGUAGE_FILTERS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                  </select>
+                </label>
+              </div>
             </div>
-            <div className="letter-filter" aria-label="按歌手首字母筛选">
-              {['全部', ...sections].map((letter) => (
-                <button key={letter} className={section === letter ? 'active' : ''} onClick={() => setSection(letter)}>
-                  {letter}
-                </button>
-              ))}
+            <div className="letter-filter-row">
+              <span>歌手</span>
+              <div className="letter-filter" aria-label="按歌手首字母筛选">
+                {['全部', ...sections].map((letter) => (
+                  <button key={letter} className={section === letter ? 'active' : ''} onClick={() => updateCategory(setSection, letter)}>
+                    {letter}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
+
+          {randomSong && (
+            <section className="random-pick" aria-live="polite">
+              <span className="random-pick__icon"><Dices size={22} /></span>
+              <div className="random-pick__song">
+                <small>这次抽到</small>
+                <strong>{randomSong.title}</strong>
+                <span>{randomSong.artist} · {randomSong.genre} · {randomSong.languages.join(' / ')}</span>
+              </div>
+              <div className="random-pick__actions">
+                <button className="button button--secondary button--small" onClick={chooseRandomSong}>
+                  <Dices size={15} /> 再摇一次
+                </button>
+                <button
+                  className="button button--primary button--small"
+                  disabled={activeSongIds.has(randomSong.id) || requesting === randomSong.id || !state.settings.requestsOpen}
+                  onClick={() => requestSong(randomSong)}
+                >
+                  {activeSongIds.has(randomSong.id) ? <><ListMusic size={15} /> 已在队列</> : <><Plus size={15} /> 点这首</>}
+                </button>
+              </div>
+            </section>
+          )}
 
           <div className="results-heading">
             <h2>{query ? `“${query}”的搜索结果` : section === '全部' ? '全部歌曲' : `${section} 字歌手`}</h2>
@@ -286,6 +357,8 @@ export function ViewerPage() {
                     <span>{song.artist}</span>
                   </div>
                   <div className="song-row__tags">
+                    <span className="badge badge--taxonomy">{song.genre}</span>
+                    {song.languages.map((item) => <span className="badge badge--language" key={item}>{item}</span>)}
                     {song.isChorus && <span className="badge">合唱</span>}
                     {song.note && <span className="badge badge--note">{song.note}</span>}
                   </div>
@@ -332,3 +405,4 @@ export function ViewerPage() {
     </div>
   );
 }
+

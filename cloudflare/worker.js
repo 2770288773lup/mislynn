@@ -281,7 +281,9 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname.startsWith('/api/') || url.pathname === '/socket.io' || url.pathname.startsWith('/socket.io/')) {
-      const origin = new URL(env.ORIGIN_URL || 'http://43.135.4.44');
+      // Use a DNS hostname that resolves to the origin IP. Cloudflare blocks
+      // Worker fetches addressed directly to a bare IP (error 1003).
+      const origin = new URL(env.ORIGIN_URL || 'http://43-135-4-44.sslip.io');
       url.protocol = origin.protocol;
       url.hostname = origin.hostname;
       url.port = origin.port;
@@ -297,3 +299,4 @@ export default {
     return env.ASSETS.fetch(request);
   },
 };
+

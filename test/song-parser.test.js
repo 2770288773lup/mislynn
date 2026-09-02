@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseSongList } from '../server/song-parser.js';
 import { isVipNickname, normalizeNickname, normalizeVipNicknames } from '../server/database.js';
+import { classifySong, inferGenre, inferLanguages } from '../src/song-taxonomy.js';
 
 test('parses artist sections, chorus tags and related notes', () => {
   const songs = parseSongList('A\n歌手：普通歌、合唱歌（合唱）、夏天（关联：冬天）');
@@ -37,3 +38,27 @@ test('parses loose songs from the other and newly-added sections', () => {
     { artist: '小时姑娘/HITA', title: '同簪', section: '#', isChorus: false, note: '' },
   ]);
 });
+
+test('classifies song languages from markers, singers and mixed-language labels', () => {
+  assert.deepEqual(inferLanguages({ artist: '陈奕迅', title: '陀飞轮' }), ['粤语']);
+  assert.deepEqual(inferLanguages({ artist: '陈奕迅', title: '十年' }), ['国语']);
+  assert.deepEqual(inferLanguages({ artist: '王菲', title: '匆匆那年（国/粤）' }), ['国语', '粤语']);
+  assert.deepEqual(inferLanguages({ artist: '其他', title: '光るなら（日语）' }), ['日语']);
+  assert.deepEqual(inferLanguages({ artist: '其他', title: '光るなら（粤语）' }), ['粤语']);
+});
+
+test('classifies common catalogue genres and keeps stable defaults', () => {
+  assert.equal(inferGenre({ artist: '黄诗扶', title: '夜奔' }), '古风');
+  assert.equal(inferGenre({ artist: 'Beyond', title: '海阔天空' }), '摇滚');
+  assert.equal(inferGenre({ artist: '陈粒', title: '小半' }), '民谣');
+  assert.equal(inferGenre({ artist: '绝区零（游戏原声）', title: '闪亮' }), '动漫游戏');
+  assert.equal(inferGenre({ artist: '梁静茹', title: '勇气' }), '流行');
+  assert.deepEqual(classifySong({ id: 1, artist: '蔡琴', title: '渡口' }), {
+    id: 1,
+    artist: '蔡琴',
+    title: '渡口',
+    languages: ['国语'],
+    genre: '经典',
+  });
+});
+
