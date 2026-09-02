@@ -22,5 +22,7 @@ fs.mkdirSync(path.dirname(output), { recursive: true });
 fs.writeFileSync(output, `export default ${JSON.stringify(songs, null, 2)};\n`, 'utf8');
 const characterDir = path.join(root, 'public', 'assets', 'character');
 fs.mkdirSync(characterDir, { recursive: true });
-for (const file of fs.readdirSync(path.join(root, 'pictures'))) fs.copyFileSync(path.join(root, 'pictures', file), path.join(characterDir, file));
+for (const entry of fs.readdirSync(path.join(root, 'pictures'), { withFileTypes: true })) {
+  if (entry.isFile()) fs.copyFileSync(path.join(root, 'pictures', entry.name), path.join(characterDir, entry.name));
+}
 console.log(`Generated ${songs.length} songs and copied character assets.`);

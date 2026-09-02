@@ -280,9 +280,19 @@ export class StageRoom {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname.startsWith('/api/') || url.pathname === '/ws') {
-      const id = env.STAGE.idFromName('global');
-      return env.STAGE.get(id).fetch(request);
+    if (url.pathname.startsWith('/api/') || url.pathname === '/socket.io' || url.pathname.startsWith('/socket.io/')) {
+      const origin = new URL(env.ORIGIN_URL || 'http://43.135.4.44');
+      url.protocol = origin.protocol;
+      url.hostname = origin.hostname;
+      url.port = origin.port;
+      const headers = new Headers(request.headers);
+      headers.delete('host');
+      return fetch(new Request(url.toString(), {
+        method: request.method,
+        headers,
+        body: ['GET', 'HEAD'].includes(request.method) ? undefined : request.body,
+        redirect: 'manual',
+      }));
     }
     return env.ASSETS.fetch(request);
   },

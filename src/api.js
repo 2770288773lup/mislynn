@@ -23,25 +23,8 @@ let socket;
 
 export function liveSocket() {
   if (!socket) {
-    // The Node deployment exposes Socket.IO; the Cloudflare Worker exposes /ws.
-    const isWorkerRuntime = window.location.hostname.endsWith('.workers.dev') || window.location.hostname.endsWith('.pages.dev');
-    if (!isWorkerRuntime) {
-      socket = io({ autoConnect: true });
-      return socket;
-    }
-    const listeners = new Set();
-    let connection;
-    let reconnectTimer;
-    const connect = () => {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      connection = new WebSocket(`${protocol}//${window.location.host}/ws`);
-      connection.addEventListener('message', (event) => {
-        try { if (JSON.parse(event.data).type === 'state:update') listeners.forEach((listener) => listener()); } catch { /* ignore malformed heartbeat */ }
-      });
-      connection.addEventListener('close', () => { clearTimeout(reconnectTimer); reconnectTimer = setTimeout(connect, 3000); });
-    };
-    connect();
-    socket = { on: (_event, listener) => listeners.add(listener), off: (_event, listener) => listeners.delete(listener) };
+    // Both public domains use the same Socket.IO backend through the Worker proxy.
+    socket = io({ autoConnect: true });
   }
   return socket;
 }
